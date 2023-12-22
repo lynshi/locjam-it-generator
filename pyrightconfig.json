@@ -1,0 +1,5 @@
+{
+  "include": [
+    "locjamit", "test", "main.py"
+  ]
+}
