@@ -2,7 +2,7 @@
 
 # Change these parameter values for your project.
 MAIN="main.py"
-PACKAGES="sample"
+PACKAGES="locjamit"
 MINIMUM_CODE_COVERAGE=100
 UNIT_TEST_DIRECTORY="test"
 
