@@ -1,6 +1,6 @@
 from enum import Enum
 import os
-from typing import Optional
+from typing import Callable, Dict, Optional
 
 
 class ReplaceStatus(Enum):
@@ -24,7 +24,7 @@ class ReplaceResult:
         return self._status
 
     @property
-    def result(self) -> str:
+    def value(self) -> str:
         if self.status is not ReplaceStatus.SUCCESS:
             raise RuntimeError(f"Cannot get result when status is {self.status}")
         
@@ -36,12 +36,11 @@ class Replacer:
     """Base class for replacing text.
     """
 
-    def __init__(self, input_file: str):
+    def __init__(self, input_file: str, builder: Callable[[str], Dict[str, str]]):
         if not os.path.isfile(input_file):
             raise FileNotFoundError(f"{input_file} not found")
         
-        self._input_file = input_file
-        self._translations = {}
+        self._translations = builder(input_file)
 
     def replace(self, src: str) -> ReplaceResult:
         """Returns the translation given a source string.
