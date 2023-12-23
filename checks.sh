@@ -2,7 +2,7 @@
 
 # Change these parameter values for your project.
 MAIN="main.py"
-PACKAGES="sample"
+PACKAGES="locjamit"
 MINIMUM_CODE_COVERAGE=100
 UNIT_TEST_DIRECTORY="test"
 
@@ -59,8 +59,14 @@ then
     exit 1
 fi
 
+test_lint_disable="duplicate-code,
+    missing-module-docstring,
+    missing-function-docstring,
+    invalid-name,
+    protected-access"
+
 echo -e "${BLUE}...linting tests with pylint...${NC}"
-pylint --disable=duplicate-code $UNIT_TEST_DIRECTORY
+pylint "--disable=${test_lint_disable}" $UNIT_TEST_DIRECTORY
 if [ $? -ne 0 ]
 then
     echo -e "${RED}Linting failed.${NC}"
