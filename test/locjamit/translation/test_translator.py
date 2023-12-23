@@ -2,7 +2,8 @@ import os
 
 import pytest
 
-from locjamit.translation import Translator, TranslationStatus
+from locjamit import Translator
+from locjamit.translation import TranslationStatus
 from locjamit.translation._translator import TranslationResult
 
 
