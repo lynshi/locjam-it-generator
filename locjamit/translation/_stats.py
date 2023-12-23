@@ -4,6 +4,8 @@ from typing import Dict, List, Set, Tuple
 
 
 class TranslationStatistics:
+    """Accumulator for translations statistics."""
+
     def __init__(self, translations: Dict[str, str]):
         self._use_count = {k: 0 for k in translations.keys()}
         self._counts = {0: set(translations.keys())}
@@ -16,6 +18,12 @@ class TranslationStatistics:
         self._use_count[source] = curr
 
         self._counts[prev].remove(source)
+        if len(self._counts[prev]) == 0:
+            del self._counts[prev]
+
+        if curr not in self._counts:
+            self._counts[curr] = set()
+
         self._counts[curr].add(source)
 
     def get_unused(self) -> Set[str]:
@@ -30,7 +38,7 @@ class TranslationStatistics:
         """Returns a list of translations used multiple times sorted in descending order."""
         multi_use = []
         for c in sorted(self._counts, reverse=True):
-            if c == 1:
+            if c in {0, 1}:
                 break
 
             multi_use.append((c, self._counts[c]))

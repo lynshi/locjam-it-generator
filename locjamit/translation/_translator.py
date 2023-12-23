@@ -83,4 +83,5 @@ class Translator:
         )
 
     def get_stats(self) -> TranslationStatistics:
+        """Gets stats for translation usage."""
         return self._stats
