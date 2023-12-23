@@ -1,6 +1,4 @@
 import os
-import tempfile
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -9,10 +7,11 @@ from locjamit.replacer._replacer import ReplaceResult
 
 
 @pytest.mark.parametrize(
-    "status",
-    filter(lambda x: x is not ReplaceStatus.SUCCESS, list(ReplaceStatus))
+    "status", filter(lambda x: x is not ReplaceStatus.SUCCESS, list(ReplaceStatus))
 )
-def test_ReplaceResult_init_raisesIfResultProvidedAndStatusNotSuccess(status: ReplaceStatus):
+def test_ReplaceResult_init_raisesIfResultProvidedAndStatusNotSuccess(
+    status: ReplaceStatus,
+):
     with pytest.raises(ValueError):
         ReplaceResult(status, "")
 
@@ -32,15 +31,14 @@ def test_ReplaceResult_init_raisesIfResultNotProvidedAndStatusSuccess():
 
 
 @pytest.mark.parametrize(
-    "status",
-    filter(lambda x: x is not ReplaceStatus.SUCCESS, list(ReplaceStatus))
+    "status", filter(lambda x: x is not ReplaceStatus.SUCCESS, list(ReplaceStatus))
 )
 def test_ReplaceResult_propertiesWhenNotSuccess(status: ReplaceStatus):
     result = ReplaceResult(status)
     assert result.status is status
 
     with pytest.raises(RuntimeError):
-        result.value
+        print(result.value)
 
 
 def test_ReplaceResult_propertiesWhenSuccess():
@@ -49,12 +47,6 @@ def test_ReplaceResult_propertiesWhenSuccess():
 
     assert result.status is ReplaceStatus.SUCCESS
     assert result.value == value
-
-
-@pytest.fixture(name="tmpdir")
-def fixture_tmpdir():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        yield tmpdir
 
 
 def test_init_raisesIfFileNotFound(tmpdir: str):
@@ -69,12 +61,8 @@ def test_init(tmpdir: str):
     with open(input_file, "w", encoding="utf-8") as outfile:
         outfile.write("Hello, world!")
 
-    builder = MagicMock()
-    replacer = Replacer(input_file, builder)
-
-    assert replacer._translations == builder.return_value
-
-    builder.assert_called_once_with(input_file)
+    replacer = Replacer(input_file, lambda _: {"hello": "world"})
+    assert replacer._translations == {"hello": "world"}
 
 
 def test_replace_notFound(tmpdir: str):
@@ -83,7 +71,7 @@ def test_replace_notFound(tmpdir: str):
         outfile.write("Hello, world!")
 
     replacer = Replacer(input_file, lambda _: {})
-    
+
     assert replacer.replace("Anything").status is ReplaceStatus.NOT_FOUND
 
 
