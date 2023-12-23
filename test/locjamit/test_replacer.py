@@ -40,8 +40,8 @@ def test_init(tmpdir: str, translator: Translator):
 
     assert replacer._original_js == input_js
     assert replacer._translator == translator
-    assert replacer._output_file == output_file
     assert replacer.output_file == output_file
+    assert replacer.misses == []
 
 
 def test_init_exists_ok(tmpdir: str, translator: Translator):
@@ -63,8 +63,8 @@ def test_init_exists_ok(tmpdir: str, translator: Translator):
 
     assert replacer._original_js == input_js
     assert replacer._translator == translator
-    assert replacer._output_file == output_file
     assert replacer.output_file == output_file
+    assert replacer.misses == []
 
 
 def build_replacer(tmpdir: str, translator: Translator, input_js: str):
@@ -92,6 +92,8 @@ def test_replace(tmpdir: str, translator: Translator):
 		},
         menu: {
 			choose: `Vuoi:`,
+            other: `avventura`,
+            dup: `avventura`,
 			new: `Iniziare una nuova avventura`
 		}
     }
@@ -128,6 +130,8 @@ def test_replace(tmpdir: str, translator: Translator):
 		},
         menu: {
 			choose: `Vuoi:`,
+            other: `avventura`,
+            dup: `avventura`,
 			new: `this is new`
 		}
     }
@@ -135,3 +139,8 @@ def test_replace(tmpdir: str, translator: Translator):
 """.strip()
         == translated.strip()
     )
+
+    assert replacer.misses == [
+        "Vuoi:",
+        "avventura",
+    ]
