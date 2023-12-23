@@ -11,7 +11,9 @@ class TranslationStatus(Enum):  # pylint: disable=missing-class-docstring
 
 
 class TranslationResult:  # pylint: disable=missing-class-docstring
-    def __init__(self, status: TranslationStatus, result: Optional[str] = None):
+    def __init__(
+        self, source: str, status: TranslationStatus, result: Optional[str] = None
+    ):
         if result is not None and status is not TranslationStatus.SUCCESS:
             raise ValueError(
                 f"Cannot provide result when status is not {TranslationStatus.SUCCESS}"
@@ -22,8 +24,14 @@ class TranslationResult:  # pylint: disable=missing-class-docstring
                 f"Result canot be None when status is {TranslationStatus.SUCCESS}"
             )
 
+        self._source = source
         self._status = status
-        self._result = result
+        self._value = result
+
+    @property
+    def source(self) -> str:
+        """Returns the source string."""
+        return self._source
 
     @property
     def status(self) -> TranslationStatus:  # pylint: disable=missing-function-docstring
@@ -42,8 +50,8 @@ class TranslationResult:  # pylint: disable=missing-class-docstring
         if self.status is not TranslationStatus.SUCCESS:
             raise RuntimeError(f"Cannot get result when status is {self.status}")
 
-        assert self._result
-        return self._result
+        assert self._value
+        return self._value
 
 
 class Translator:  # pylint: disable=too-few-public-methods
@@ -64,6 +72,8 @@ class Translator:  # pylint: disable=too-few-public-methods
         :rtype: str
         """
         if src not in self._translations:
-            return TranslationResult(TranslationStatus.NOT_FOUND)
+            return TranslationResult(src, TranslationStatus.NOT_FOUND)
 
-        return TranslationResult(TranslationStatus.SUCCESS, self._translations[src])
+        return TranslationResult(
+            src, TranslationStatus.SUCCESS, self._translations[src]
+        )

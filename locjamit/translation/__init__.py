@@ -1,4 +1,5 @@
-"""Translators are objects that parse an input translation file to return translations when requested.
+"""Translators are objects that parse an input translation file to return translations when
+requested.
 """
 
 from locjamit.translation._csv import CsvTranslator
