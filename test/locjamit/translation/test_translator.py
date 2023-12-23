@@ -1,9 +1,10 @@
 import os
+from unittest.mock import patch
 
 import pytest
 
 from locjamit import Translator
-from locjamit.translation import TranslationStatus
+from locjamit.translation import TranslationStatistics, TranslationStatus
 from locjamit.translation._translator import TranslationResult
 
 
@@ -66,8 +67,16 @@ def test_init(tmpdir: str):
     with open(input_file, "w", encoding="utf-8") as outfile:
         outfile.write("Hello, world!")
 
-    translator = Translator(input_file, lambda _: {"hello": "world"})
+    with patch(
+        "locjamit.translation._translator.TranslationStatistics",
+        spec_set=TranslationStatistics,
+    ) as mock_stats:
+        translator = Translator(input_file, lambda _: {"hello": "world"})
+
     assert translator._translations == {"hello": "world"}
+    assert translator._stats == mock_stats.return_value
+
+    mock_stats.assert_called_once_with(translator._translations)
 
 
 def test_translate_not_found(tmpdir: str):
@@ -75,9 +84,15 @@ def test_translate_not_found(tmpdir: str):
     with open(input_file, "w", encoding="utf-8") as outfile:
         outfile.write("Hello, world!")
 
-    translator = Translator(input_file, lambda _: {})
+    with patch(
+        "locjamit.translation._translator.TranslationStatistics",
+        spec_set=TranslationStatistics,
+    ) as mock_stats:
+        translator = Translator(input_file, lambda _: {})
 
     assert translator.translate("Anything").status is TranslationStatus.NOT_FOUND
+
+    mock_stats.return_value.count_use.assert_not_called()
 
 
 def test_translate(tmpdir: str):
@@ -85,9 +100,29 @@ def test_translate(tmpdir: str):
     with open(input_file, "w", encoding="utf-8") as outfile:
         outfile.write("Hello, world!")
 
-    translator = Translator(input_file, lambda _: {"hello": "world"})
+    with patch(
+        "locjamit.translation._translator.TranslationStatistics",
+        spec_set=TranslationStatistics,
+    ) as mock_stats:
+        translator = Translator(input_file, lambda _: {"hello": "world"})
 
     result = translator.translate("hello")
 
     assert result.status is TranslationStatus.SUCCESS
     assert result.value == "world"
+
+    mock_stats.return_value.count_use.assert_called_once_with("hello")
+
+
+def test_get_stats(tmpdir: str):
+    input_file = os.path.join(tmpdir, "notexists.txt")
+    with open(input_file, "w", encoding="utf-8") as outfile:
+        outfile.write("Hello, world!")
+
+    with patch(
+        "locjamit.translation._translator.TranslationStatistics",
+        spec_set=TranslationStatistics,
+    ) as mock_stats:
+        translator = Translator(input_file, lambda _: {"hello": "world"})
+
+    assert translator.get_stats() == mock_stats.return_value

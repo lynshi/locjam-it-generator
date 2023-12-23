@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, List
 
 from locjamit.translation import TranslationStatus
 
@@ -37,6 +37,7 @@ class Replacer:
 
         self._translator = translator
         self._output_file = output_file
+        self._misses = set()
 
     @property
     def output_file(self) -> str:
@@ -60,6 +61,7 @@ class Replacer:
 
                 if translation.status is not TranslationStatus.SUCCESS:
                     translated.append(line)
+                    self._misses.add(italian)
                 else:
                     translated.append("`".join([prefix, translation.value, suffix]))
 
@@ -67,3 +69,8 @@ class Replacer:
 
         with open(self._output_file, "w", encoding="utf-8") as outfile:
             outfile.writelines(translated)
+
+    @property
+    def misses(self) -> List[str]:
+        """Returns strings that were missed in the translation."""
+        return sorted(self._misses)

@@ -4,6 +4,8 @@ from enum import Enum
 import os
 from typing import Callable, Dict, Optional
 
+from locjamit.translation._stats import TranslationStatistics
+
 
 class TranslationStatus(Enum):  # pylint: disable=missing-class-docstring
     SUCCESS = 0
@@ -54,7 +56,7 @@ class TranslationResult:  # pylint: disable=missing-class-docstring
         return self._value
 
 
-class Translator:  # pylint: disable=too-few-public-methods
+class Translator:
     """Base class for replacing text."""
 
     def __init__(self, input_file: str, builder: Callable[[str], Dict[str, str]]):
@@ -62,6 +64,7 @@ class Translator:  # pylint: disable=too-few-public-methods
             raise FileNotFoundError(f"{input_file} not found")
 
         self._translations = builder(input_file)
+        self._stats = TranslationStatistics(self._translations)
 
     def translate(self, src: str) -> TranslationResult:
         """Returns the translation given a source string.
@@ -74,6 +77,11 @@ class Translator:  # pylint: disable=too-few-public-methods
         if src not in self._translations:
             return TranslationResult(src, TranslationStatus.NOT_FOUND)
 
+        self._stats.count_use(src)
         return TranslationResult(
             src, TranslationStatus.SUCCESS, self._translations[src]
         )
+
+    def get_stats(self) -> TranslationStatistics:
+        """Gets stats for translation usage."""
+        return self._stats
