@@ -83,8 +83,7 @@ def build_replacer(tmpdir: str, translator: Translator, input_js: str):
 
 
 def test_replace(tmpdir: str, translator: Translator):
-    input_js = """
-var i18n = {
+    input_js = """var i18n = {
 	title: `          AVVENTURA NEL CASTELLO JS          `,
 	IFEngine: {
 		warnings: {
@@ -101,14 +100,15 @@ var i18n = {
     translations = {
         "          AVVENTURA NEL CASTELLO JS          ": "  Adventure  ",
         "IFEngine deve essere esteso": "must be extended",
-        "Salvataggio \"${filename}\" non trovato.": "File \"${filename}\" not found",
-        "Iniziare una nuova avventura": "this is new"
+        'Salvataggio "${filename}" non trovato.': 'File "${filename}" not found',
+        "Iniziare una nuova avventura": "this is new",
     }
+
     def translate(src: str) -> TranslationResult:
         if src not in translations:
             return TranslationResult(src, TranslationStatus.NOT_FOUND)
-        
-        return TranslationResult(src, TranslationStatus.SUCCESS, translations[s])
+
+        return TranslationResult(src, TranslationStatus.SUCCESS, translations[src])
 
     translator.translate = translate
     replacer = build_replacer(tmpdir, translator, input_js)
@@ -117,9 +117,9 @@ var i18n = {
 
     with open(replacer.output_file, encoding="utf-8") as infile:
         translated = infile.read()
-    
-    assert translated == """
-var i18n = {
+
+    assert (
+        """var i18n = {
 	title: `  Adventure  `,
 	IFEngine: {
 		warnings: {
@@ -132,4 +132,6 @@ var i18n = {
 		}
     }
 }
-"""
+""".strip()
+        == translated.strip()
+    )

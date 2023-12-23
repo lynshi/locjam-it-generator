@@ -50,17 +50,20 @@ class Replacer:
         for line in self._original_js.splitlines():
             if line.find("`") == -1:
                 translated.append(line)
-                continue
-
-            assert line.count("`") == 2, "Expected line containing game text to have exactly 2 '`'"
-
-            prefix, italian, suffix = line.split("`")
-            translation = self._translator.translate(italian)
-
-            if translation.status is not TranslationStatus.SUCCESS:
-                translated.append(line)
             else:
-                translated.append("`".join([prefix, translation.value, suffix]))
+                assert (
+                    line.count("`") == 2
+                ), "Expected line containing game text to have exactly 2 '`'"
+
+                prefix, italian, suffix = line.split("`")
+                translation = self._translator.translate(italian)
+
+                if translation.status is not TranslationStatus.SUCCESS:
+                    translated.append(line)
+                else:
+                    translated.append("`".join([prefix, translation.value, suffix]))
+
+            translated.append("\n")
 
         with open(self._output_file, "w", encoding="utf-8") as outfile:
             outfile.writelines(translated)
