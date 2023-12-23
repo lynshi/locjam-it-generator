@@ -1,15 +1,15 @@
-"""Module for building a Replacer from a CSV file.
+"""Module for building a Translator from a CSV file.
 """
 
 import csv
 from typing import Any, Callable, Dict
 
 
-from locjamit.replacer._replacer import Replacer
+from locjamit.translation._translator import Translator
 
 
-class CsvReplacer(Replacer):  # pylint: disable=too-few-public-methods
-    """Creates a Replacer from a CSV file."""
+class CsvTranslator(Translator):  # pylint: disable=too-few-public-methods
+    """Creates a Translator from a CSV file."""
 
     def __init__(self, input_csv: str, **kwargs: Any):
         builder = _build_builder(**kwargs)

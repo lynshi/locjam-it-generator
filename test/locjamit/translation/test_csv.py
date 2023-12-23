@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from locjamit.replacer import CsvReplacer
+from locjamit.translation import CsvTranslator
 
 
 def test_init(tmpdir: str):
@@ -18,8 +18,8 @@ def test_init(tmpdir: str):
         for k, v in translations.items():
             outfile.write(f"\n{k},{v}")
 
-    replacer = CsvReplacer(input_csv)
-    assert replacer._translations == translations
+    translator = CsvTranslator(input_csv)
+    assert translator._translations == translations
 
 
 def test_init_with_kwargs(tmpdir: str):
@@ -39,10 +39,10 @@ def test_init_with_kwargs(tmpdir: str):
         for k, v in translations.items():
             outfile.write(f"\n{k}{delimiter}{v}")
 
-    replacer = CsvReplacer(
+    translator = CsvTranslator(
         input_csv, src_header=src_header, dest_header=dest_header, delimiter=delimiter
     )
-    assert replacer._translations == translations
+    assert translator._translations == translations
 
 
 def test_init_detects_duplicates(tmpdir: str):
@@ -61,4 +61,4 @@ def test_init_detects_duplicates(tmpdir: str):
         outfile.write("\nhello,again")
 
     with pytest.raises(RuntimeError):
-        CsvReplacer(input_csv)
+        CsvTranslator(input_csv)

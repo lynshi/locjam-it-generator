@@ -5,48 +5,48 @@ import os
 from typing import Callable, Dict, Optional
 
 
-class ReplaceStatus(Enum):  # pylint: disable=missing-class-docstring
+class TranslationStatus(Enum):  # pylint: disable=missing-class-docstring
     SUCCESS = 0
     NOT_FOUND = 1
 
 
-class ReplaceResult:  # pylint: disable=missing-class-docstring
-    def __init__(self, status: ReplaceStatus, result: Optional[str] = None):
-        if result is not None and status is not ReplaceStatus.SUCCESS:
+class TranslationResult:  # pylint: disable=missing-class-docstring
+    def __init__(self, status: TranslationStatus, result: Optional[str] = None):
+        if result is not None and status is not TranslationStatus.SUCCESS:
             raise ValueError(
-                f"Cannot provide result when status is not {ReplaceStatus.SUCCESS}"
+                f"Cannot provide result when status is not {TranslationStatus.SUCCESS}"
             )
 
-        if status is ReplaceStatus.SUCCESS and not result:
+        if status is TranslationStatus.SUCCESS and not result:
             raise ValueError(
-                f"Result canot be None when status is {ReplaceStatus.SUCCESS}"
+                f"Result canot be None when status is {TranslationStatus.SUCCESS}"
             )
 
         self._status = status
         self._result = result
 
     @property
-    def status(self) -> ReplaceStatus:  # pylint: disable=missing-function-docstring
+    def status(self) -> TranslationStatus:  # pylint: disable=missing-function-docstring
         return self._status
 
     @property
     def value(self) -> str:
-        """Returns the replacement value.
+        """Returns the translation value.
 
         Raises a RuntimeError if the status is not SUCCESS.
 
         :raises RuntimeError: When the status is not SUCCESS.
-        :return: The replacement value.
+        :return: The translation value.
         :rtype: str
         """
-        if self.status is not ReplaceStatus.SUCCESS:
+        if self.status is not TranslationStatus.SUCCESS:
             raise RuntimeError(f"Cannot get result when status is {self.status}")
 
         assert self._result
         return self._result
 
 
-class Replacer:  # pylint: disable=too-few-public-methods
+class Translator:  # pylint: disable=too-few-public-methods
     """Base class for replacing text."""
 
     def __init__(self, input_file: str, builder: Callable[[str], Dict[str, str]]):
@@ -55,7 +55,7 @@ class Replacer:  # pylint: disable=too-few-public-methods
 
         self._translations = builder(input_file)
 
-    def replace(self, src: str) -> ReplaceResult:
+    def translate(self, src: str) -> TranslationResult:
         """Returns the translation given a source string.
 
         :param src: A string in the original language.
@@ -64,6 +64,6 @@ class Replacer:  # pylint: disable=too-few-public-methods
         :rtype: str
         """
         if src not in self._translations:
-            return ReplaceResult(ReplaceStatus.NOT_FOUND)
+            return TranslationResult(TranslationStatus.NOT_FOUND)
 
-        return ReplaceResult(ReplaceStatus.SUCCESS, self._translations[src])
+        return TranslationResult(TranslationStatus.SUCCESS, self._translations[src])
