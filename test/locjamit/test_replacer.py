@@ -3,6 +3,8 @@ import os
 import pytest
 
 from locjamit import Replacer, Translator
+from locjamit.translation import TranslationStatus
+from locjamit.translation._translator import TranslationResult
 
 
 def test_init_input_not_found(tmpdir: str, translator: Translator):
@@ -39,6 +41,7 @@ def test_init(tmpdir: str, translator: Translator):
     assert replacer._original_js == input_js
     assert replacer._translator == translator
     assert replacer._output_file == output_file
+    assert replacer.output_file == output_file
 
 
 def test_init_exists_ok(tmpdir: str, translator: Translator):
@@ -61,6 +64,7 @@ def test_init_exists_ok(tmpdir: str, translator: Translator):
     assert replacer._original_js == input_js
     assert replacer._translator == translator
     assert replacer._output_file == output_file
+    assert replacer.output_file == output_file
 
 
 def build_replacer(tmpdir: str, translator: Translator, input_js: str):
@@ -79,7 +83,53 @@ def build_replacer(tmpdir: str, translator: Translator, input_js: str):
 
 
 def test_replace(tmpdir: str, translator: Translator):
-    input_js = """"""
+    input_js = """
+var i18n = {
+	title: `          AVVENTURA NEL CASTELLO JS          `,
+	IFEngine: {
+		warnings: {
+			mustBeExtended: `IFEngine deve essere esteso`,
+			notFound: (filename) => `Salvataggio "${filename}" non trovato.`
+		},
+        menu: {
+			choose: `Vuoi:`,
+			new: `Iniziare una nuova avventura`
+		}
+    }
+}
+"""
+    translations = {
+        "          AVVENTURA NEL CASTELLO JS          ": "  Adventure  ",
+        "IFEngine deve essere esteso": "must be extended",
+        "Salvataggio \"${filename}\" non trovato.": "File \"${filename}\" not found",
+        "Iniziare una nuova avventura": "this is new"
+    }
+    def translate(src: str) -> TranslationResult:
+        if src not in translations:
+            return TranslationResult(src, TranslationStatus.NOT_FOUND)
+        
+        return TranslationResult(src, TranslationStatus.SUCCESS, translations[s])
+
+    translator.translate = translate
     replacer = build_replacer(tmpdir, translator, input_js)
 
     replacer.replace()
+
+    with open(replacer.output_file, encoding="utf-8") as infile:
+        translated = infile.read()
+    
+    assert translated == """
+var i18n = {
+	title: `  Adventure  `,
+	IFEngine: {
+		warnings: {
+			mustBeExtended: `must be extended`,
+			notFound: (filename) => `File \"${filename}\" not found`
+		},
+        menu: {
+			choose: `Vuoi:`,
+			new: `this is new`
+		}
+    }
+}
+"""

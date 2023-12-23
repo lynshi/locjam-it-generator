@@ -38,6 +38,11 @@ class Replacer:
         self._translator = translator
         self._output_file = output_file
 
+    @property
+    def output_file(self) -> str:
+        """Returns the name of the file containing translated output."""
+        return self._output_file
+
     def replace(self):
         """Translate the input JavaScript file and emits the specified output file."""
 
