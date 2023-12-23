@@ -4,6 +4,8 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Any
 
+from locjamit.translation import TranslationStatus
+
 if TYPE_CHECKING:  # pragma: no cover
     from locjamit.translation import Translator
 
@@ -34,17 +36,26 @@ class Replacer:
             self._original_js = infile.read()
 
         self._translator = translator
-        self._translated_js = ""
         self._output_file = output_file
-        self._translation_complete = False
 
     def replace(self):
         """Translate the input JavaScript file and emits the specified output file."""
 
-    def summarize(self):
-        """Summarizes the results."""
+        translated = []
+        for line in self._original_js.splitlines():
+            if line.find("`") == -1:
+                translated.append(line)
+                continue
 
-        if not self._translation_complete:
-            raise RuntimeError(
-                "Cannot generate a summary while translation is incomplete"
-            )
+            assert line.count("`") == 2, "Expected line containing game text to have exactly 2 '`'"
+
+            prefix, italian, suffix = line.split("`")
+            translation = self._translator.translate(italian)
+
+            if translation.status is not TranslationStatus.SUCCESS:
+                translated.append(line)
+            else:
+                translated.append("`".join([prefix, translation.value, suffix]))
+
+        with open(self._output_file, "w", encoding="utf-8") as outfile:
+            outfile.writelines(translated)

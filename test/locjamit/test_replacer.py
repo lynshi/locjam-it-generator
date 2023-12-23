@@ -38,9 +38,7 @@ def test_init(tmpdir: str, translator: Translator):
 
     assert replacer._original_js == input_js
     assert replacer._translator == translator
-    assert replacer._translated_js == ""
     assert replacer._output_file == output_file
-    assert replacer._translation_complete is False
 
 
 def test_init_exists_ok(tmpdir: str, translator: Translator):
@@ -62,9 +60,7 @@ def test_init_exists_ok(tmpdir: str, translator: Translator):
 
     assert replacer._original_js == input_js
     assert replacer._translator == translator
-    assert replacer._translated_js == ""
     assert replacer._output_file == output_file
-    assert replacer._translation_complete is False
 
 
 def build_replacer(tmpdir: str, translator: Translator, input_js: str):
@@ -87,21 +83,3 @@ def test_replace(tmpdir: str, translator: Translator):
     replacer = build_replacer(tmpdir, translator, input_js)
 
     replacer.replace()
-
-
-def test_summarize_raises_if_translation_incomplete(
-    tmpdir: str, translator: Translator
-):
-    input_js = """"""
-    replacer = build_replacer(tmpdir, translator, input_js)
-
-    with pytest.raises(RuntimeError):
-        replacer.summarize()
-
-
-def test_summarize(tmpdir: str, translator: Translator):
-    input_js = """"""
-    replacer = build_replacer(tmpdir, translator, input_js)
-
-    replacer._translation_complete = True
-    replacer.summarize()
