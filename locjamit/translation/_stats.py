@@ -7,27 +7,27 @@ class TranslationStatistics:
     """Accumulator for translations statistics."""
 
     def __init__(self, translations: Dict[str, str]):
-        self._use_count = {k: 0 for k in translations.keys()}
-        self._counts = {0: set(translations.keys())}
+        self._use_count = {k: 0 for k in translations.values()}
+        self._counts = {0: set(translations.values())}
 
-    def count_use(self, source: str) -> None:
+    def count_use(self, dest: str) -> None:
         """Registers a use of the source string."""
-        prev = self._use_count[source]
+        prev = self._use_count[dest]
         curr = prev + 1
 
-        self._use_count[source] = curr
+        self._use_count[dest] = curr
 
-        self._counts[prev].remove(source)
+        self._counts[prev].remove(dest)
         if len(self._counts[prev]) == 0:
             del self._counts[prev]
 
         if curr not in self._counts:
             self._counts[curr] = set()
 
-        self._counts[curr].add(source)
+        self._counts[curr].add(dest)
 
     def get_unused(self) -> Set[str]:
-        """Gets a set of the unused words."""
+        """Gets a set of the unused strings."""
         return self._counts[0]
 
     def get_use_counts(self) -> Dict[str, int]:

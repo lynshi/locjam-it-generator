@@ -8,6 +8,23 @@ from typing import Any, Callable, Dict
 from locjamit.translation._translator import Translator
 
 
+class CsvConfig:  # pylint: disable=too-few-public-methods
+    """Parses configuration for a CsvTranslator."""
+
+    def __init__(self, config: Dict[str, Any]):
+        self._config = config
+
+    def as_kwargs(self) -> Dict[str, Any]:  # pylint: disable=missing-function-docstring
+        config = {}
+
+        fields = ["encoding", "src_header", "dest_header", "delimiter"]
+        for field in fields:
+            if field in self._config:
+                config[field] = self._config[field]
+
+        return config
+
+
 class CsvTranslator(Translator):  # pylint: disable=too-few-public-methods
     """Creates a Translator from a CSV file."""
 
@@ -29,12 +46,11 @@ def _build_builder(**kwargs: Any) -> Callable[[str], Dict[str, str]]:
                 src = row[src_header]
                 dest = row[dest_header]
 
-                if src in translations:
+                if src in translations and dest != translations[src]:
                     raise RuntimeError(f"'{src}' has been translated twice")
 
                 translations[src] = dest
 
-        print(translations)
         return translations
 
     return _builder
