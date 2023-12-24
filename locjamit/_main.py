@@ -11,15 +11,20 @@ from locjamit.translation import CsvConfig, CsvTranslator
 
 
 def main():
+    """Main method for the translation utility."""
+
     parser = argparse.ArgumentParser(
         "locjamit",
-        description="Generates a JavaScript file containing translated strings for LocJAM Made in Italy",
+        description=(
+            "Generates a JavaScript file containing translated strings for LocJAM Made in "
+            "Italy"
+        ),
     )
 
     parser.add_argument(
         "-c",
         "--config",
-        description="Path to the configuration file",
+        help="Path to the configuration file",
         required=True,
         type=str,
     )
@@ -51,12 +56,14 @@ def main():
 
     try:
         replacement_status = replacer.replace()
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.opt(exception=True).error("Error generating translated file")
         raise
 
-    if replacement_status is not ReplacementStatus.SUCCESS:
+    if replacement_status is not ReplacementStatus.SUCCESS:  # pragma: no cover
         logger.warning(f"There are warnings. Please check {config.stats_file}.")
         return
 
-    logger.success(f"Translation success! Please open {config.output_file}")
+    logger.success(  # pragma: no cover
+        f"Translation success! Please open {config.output_file}"
+    )

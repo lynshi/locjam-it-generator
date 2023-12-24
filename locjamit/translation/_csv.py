@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict
 from locjamit.translation._translator import Translator
 
 
-class CsvConfig:
+class CsvConfig:  # pylint: disable=too-few-public-methods
     """Parses configuration for a CsvTranslator."""
 
     def __init__(self, config: Dict[str, Any]):

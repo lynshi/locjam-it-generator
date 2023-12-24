@@ -15,6 +15,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class ReplacementStatus(Enum):
+    """Status of the replacement."""
+
     SUCCESS = 0
     WARNING = 1
 

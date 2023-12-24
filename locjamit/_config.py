@@ -16,9 +16,9 @@ class Config:
             self._config = json.load(infile)
 
     @property
-    def csv_config(
+    def csv_config(  # pylint: disable=missing-function-docstring
         self,
-    ) -> Dict[str, Any]:  # pylint: disable=missing-function-docstring
+    ) -> Dict[str, Any]:
         return self._config.get("csv", {})
 
     @property
