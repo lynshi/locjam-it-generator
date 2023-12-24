@@ -46,7 +46,7 @@ def _build_builder(**kwargs: Any) -> Callable[[str], Dict[str, str]]:
                 src = row[src_header]
                 dest = row[dest_header]
 
-                if src in translations:
+                if src in translations and dest != translations[src]:
                     raise RuntimeError(f"'{src}' has been translated twice")
 
                 translations[src] = dest
