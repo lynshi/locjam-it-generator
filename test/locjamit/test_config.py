@@ -16,8 +16,8 @@ def test_init_config_not_found(tmpdir: str):
 def test_init(tmpdir: str):
     config_json = {
         "input": "/path/to/input.js",
-        "missed": "/path/to/missed.txt",
         "output": "/path/to/output.js",
+        "statistics": "/path/to/statistics.txt",
         "translations": "/path/to/translations.csv",
     }
 
@@ -27,18 +27,20 @@ def test_init(tmpdir: str):
 
     config = Config(config_file)
     assert config.input_file == config_json["input"]
-    assert config.missed_file == config_json["missed"]
     assert config.output_file == config_json["output"]
+    assert config.stats_file == config_json["statistics"]
     assert config.translations_file == config_json["translations"]
     assert config.csv_config == {}
 
 
-@pytest.mark.parametrize("missing_key", ["input", "missed", "output", "translations"])
+@pytest.mark.parametrize(
+    "missing_key", ["input", "output", "statistics", "translations"]
+)
 def test_init_missing_keys(tmpdir: str, missing_key: str):
     config_json = {
         "input": "/path/to/input.js",
-        "missed": "/path/to/missed.txt",
         "output": "/path/to/output.js",
+        "statistics": "/path/to/statistics.txt",
         "translations": "/path/to/translations.csv",
     }
     del config_json[missing_key]
@@ -50,8 +52,8 @@ def test_init_missing_keys(tmpdir: str, missing_key: str):
     config = Config(config_file)
     with pytest.raises(ValueError):
         assert config.input_file == config_json["input"]
-        assert config.missed_file == config_json["missed"]
         assert config.output_file == config_json["output"]
+        assert config.stats_file == config_json["statistics"]
         assert config.translations_file == config_json["translations"]
         assert config.csv_config == {}
 

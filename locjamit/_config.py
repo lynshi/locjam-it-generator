@@ -4,8 +4,6 @@ import json
 import os
 from typing import Any, Dict
 
-from loguru import logger
-
 
 class Config:
     """Loads configuration for the program."""
@@ -29,13 +27,13 @@ class Config:
         return self._get_field(field_name)
 
     @property
-    def missed_file(self) -> str:  # pylint: disable=missing-function-docstring
-        field_name = "missed"
+    def output_file(self) -> str:  # pylint: disable=missing-function-docstring
+        field_name = "output"
         return self._get_field(field_name)
 
     @property
-    def output_file(self) -> str:  # pylint: disable=missing-function-docstring
-        field_name = "output"
+    def stats_file(self) -> str:  # pylint: disable=missing-function-docstring
+        field_name = "statistics"
         return self._get_field(field_name)
 
     @property
