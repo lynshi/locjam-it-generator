@@ -4,6 +4,8 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Any, List
 
+from loguru import logger
+
 from locjamit.translation import TranslationStatus
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -51,6 +53,7 @@ class Replacer:
         for line in self._original_js.splitlines():
             if line.find("`") == -1:
                 translated.append(line)
+                logger.debug(f"Contains no Italian: '{line}'")
             else:
                 assert (
                     line.count("`") == 2
