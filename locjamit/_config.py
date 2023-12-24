@@ -7,6 +7,8 @@ from loguru import logger
 
 
 class Config:
+    """Loads configuration for the program."""
+
     def __init__(self, config_file: str):
         if not os.path.isfile(config_file):
             raise FileNotFoundError(f"{config_file} not found")
@@ -22,25 +24,31 @@ class Config:
         )
 
     @property
-    def input_file(self) -> str:
+    def input_file(self) -> str:  # pylint: disable=missing-function-docstring
         field_name = "input"
         try:
             return self._config[field_name]
-        except KeyError:
-            raise ValueError(f"`{field_name}` field not present in configuration")
+        except KeyError as exc:
+            raise ValueError(
+                f"`{field_name}` field not present in configuration"
+            ) from exc
 
     @property
-    def output_file(self) -> str:
+    def output_file(self) -> str:  # pylint: disable=missing-function-docstring
         field_name = "output"
         try:
             return self._config[field_name]
-        except KeyError:
-            raise ValueError(f"`{field_name}` field not present in configuration")
+        except KeyError as exc:
+            raise ValueError(
+                f"`{field_name}` field not present in configuration"
+            ) from exc
 
     @property
-    def translations_file(self) -> str:
+    def translations_file(self) -> str:  # pylint: disable=missing-function-docstring
         field_name = "translations"
         try:
             return self._config[field_name]
-        except KeyError:
-            raise ValueError(f"`{field_name}` field not present in configuration")
+        except KeyError as exc:
+            raise ValueError(
+                f"`{field_name}` field not present in configuration"
+            ) from exc
