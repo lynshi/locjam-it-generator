@@ -77,9 +77,12 @@ class Translator:
         if src not in self._translations:
             return TranslationResult(src, TranslationStatus.NOT_FOUND)
 
-        self._stats.count_use(src)
+        translation = self._translations[src]
+        self._stats.count_use(translation)
         return TranslationResult(
-            src, TranslationStatus.SUCCESS, self._translations[src]
+            src,
+            TranslationStatus.SUCCESS,
+            translation,
         )
 
     def get_stats(self) -> TranslationStatistics:

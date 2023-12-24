@@ -111,7 +111,7 @@ def test_translate(tmpdir: str):
     assert result.status is TranslationStatus.SUCCESS
     assert result.value == "world"
 
-    mock_stats.return_value.count_use.assert_called_once_with("hello")
+    mock_stats.return_value.count_use.assert_called_once_with("world")
 
 
 def test_get_stats(tmpdir: str):

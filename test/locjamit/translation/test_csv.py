@@ -13,10 +13,16 @@ from locjamit.translation import CsvConfig, CsvTranslator
         "encoding",
         "src_header",
         "dest_header",
+        "delimiter",
     ],
 )
 def test_CsvConfig(missing: Optional[str]):
-    config_json = {"encoding": "ascii", "src_header": "dest", "dest_header": "src"}
+    config_json = {
+        "encoding": "ascii",
+        "src_header": "dest",
+        "dest_header": "src",
+        "delimiter": ";",
+    }
 
     if missing:
         del config_json[missing]

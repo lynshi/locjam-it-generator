@@ -17,7 +17,7 @@ class CsvConfig:
     def as_kwargs(self) -> Dict[str, Any]:  # pylint: disable=missing-function-docstring
         config = {}
 
-        fields = ["encoding", "src_header", "dest_header"]
+        fields = ["encoding", "src_header", "dest_header", "delimiter"]
         for field in fields:
             if field in self._config:
                 config[field] = self._config[field]
@@ -51,7 +51,6 @@ def _build_builder(**kwargs: Any) -> Callable[[str], Dict[str, str]]:
 
                 translations[src] = dest
 
-        print(translations)
         return translations
 
     return _builder

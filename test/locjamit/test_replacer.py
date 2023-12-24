@@ -1,9 +1,10 @@
+import json
 import os
 
 import pytest
 
-from locjamit import Replacer, Translator
-from locjamit.translation import TranslationStatus
+from locjamit import ReplacementStatus, Replacer, Translator
+from locjamit.translation import CsvTranslator, TranslationStatus
 from locjamit.translation._translator import TranslationResult
 
 
@@ -66,9 +67,6 @@ def test_replace(tmpdir: str, translator: Translator):
 			notFound: (filename) => `Salvataggio "${filename}" non trovato.`
 		},
         menu: {
-			choose: `Vuoi:`,
-            other: `avventura`,
-            dup: `avventura`,
 			new: `Iniziare una nuova avventura`
 		}
     }
@@ -90,7 +88,85 @@ def test_replace(tmpdir: str, translator: Translator):
     translator.translate = translate
     replacer = build_replacer(tmpdir, translator, input_js)
 
-    replacer.replace()
+    assert replacer.replace() is ReplacementStatus.SUCCESS
+
+    with open(replacer.output_file, encoding="utf-8") as infile:
+        translated = infile.read()
+
+    assert (
+        """var i18n = {
+	title: `  Adventure  `,
+	IFEngine: {
+		warnings: {
+			mustBeExtended: `must be extended`,
+			notFound: (filename) => `File \"${filename}\" not found`
+		},
+        menu: {
+			new: `this is new`
+		}
+    }
+}
+""".strip()
+        == translated.strip()
+    )
+
+    assert replacer._misses == set()
+    assert replacer._translated is True
+
+    with open(replacer._statistics_file, encoding="utf-8") as infile:
+        stats = json.load(infile)
+
+    assert stats == {
+        "misses": {"count": 0, "strings": []},
+        "unused": {"count": 0, "strings": []},
+        "used_repeatedly": {
+            "count": 0,
+            "strings": {},
+        },
+    }
+
+    with pytest.raises(AssertionError):
+        replacer.replace()
+
+
+def test_replace_with_warnings(tmpdir: str):
+    input_js = """var i18n = {
+	title: `          AVVENTURA NEL CASTELLO JS          `,
+	IFEngine: {
+		warnings: {
+			mustBeExtended: `IFEngine deve essere esteso`,
+			notFound: (filename) => `Salvataggio "${filename}" non trovato.`
+		},
+        menu: {
+			choose: `Vuoi:`,
+            other: `avventura`,
+            dup: `avventura`,
+			new: `Iniziare una nuova avventura`
+            repeated0: `repeated`,
+            repeated1: `repeated`,
+		}
+    }
+}
+"""
+    translations = {
+        "          AVVENTURA NEL CASTELLO JS          ": "  Adventure  ",
+        "IFEngine deve essere esteso": "must be extended",
+        'Salvataggio "${filename}" non trovato.': 'File "${filename}" not found',
+        "Iniziare una nuova avventura": "this is new",
+        "unused": "not-used",
+        "repeated": "used-repeatedly",
+    }
+    translations_csv = ["source,destination"]
+    for k, v in translations.items():
+        translations_csv.append(f"{k},{v}")
+
+    transations_file = os.path.join(tmpdir, "translations.csv")
+    with open(transations_file, "w", encoding="utf-8") as outfile:
+        outfile.write("\n".join(translations_csv))
+
+    replacer = build_replacer(tmpdir, CsvTranslator(transations_file), input_js)
+
+    assert replacer.replace() == ReplacementStatus.WARNING
 
     with open(replacer.output_file, encoding="utf-8") as infile:
         translated = infile.read()
@@ -108,6 +184,8 @@ def test_replace(tmpdir: str, translator: Translator):
             other: `avventura`,
             dup: `avventura`,
 			new: `this is new`
+            repeated0: `used-repeatedly`,
+            repeated1: `used-repeatedly`,
 		}
     }
 }
@@ -121,5 +199,14 @@ def test_replace(tmpdir: str, translator: Translator):
     }
     assert replacer._translated is True
 
-    with pytest.raises(AssertionError):
-        replacer.replace()
+    with open(replacer._statistics_file, encoding="utf-8") as infile:
+        stats = json.load(infile)
+
+    assert stats == {
+        "misses": {"count": 2, "strings": ["Vuoi:", "avventura"]},
+        "unused": {"count": 1, "strings": ["not-used"]},
+        "used_repeatedly": {
+            "count": 1,
+            "strings": {"2": ["used-repeatedly"]},
+        },
+    }

@@ -91,9 +91,9 @@ class Replacer:
             stats = {
                 "misses": {"count": len(self._misses), "strings": sorted(self._misses)},
                 "unused": {"count": len(unused), "strings": sorted(unused)},
-                "used_repeated": {
+                "used_repeatedly": {
                     "count": len(repeatedly_used),
-                    "strings": {item[0]: item[1] for item in repeatedly_used},
+                    "strings": {item[0]: sorted(item[1]) for item in repeatedly_used},
                 },
             }
 
