@@ -43,7 +43,7 @@ class Replacer:
         self._translator = translator
         self._output_file = output_file
         self._statistics_file = statistics_file
-        self._misses = set()
+        self._misses = []
         self._translated = False
 
     @property
@@ -78,7 +78,7 @@ class Replacer:
 
                     if translation.status is not TranslationStatus.SUCCESS:
                         translated.append(line)
-                        self._misses.add(italian)
+                        self._misses.append(italian)
                     else:
                         translated.append("`".join([prefix, translation.value, suffix]))
 
@@ -88,19 +88,11 @@ class Replacer:
                 outfile.writelines(translated)
 
             translation_stats = self._translator.get_stats()
-            unused = translation_stats.get_unused()
-            repeatedly_used = translation_stats.get_repeatedly_used()
-
-            repeated_count = 0
-            for _, repeated_strings in repeatedly_used:
-                repeated_count += len(repeated_strings)
-
             stats = {
-                "misses": {"count": len(self._misses), "strings": sorted(self._misses)},
-                "unused": {"count": len(unused), "strings": sorted(unused)},
-                "used_repeatedly": {
-                    "count": repeated_count,
-                    "strings": {item[0]: sorted(item[1]) for item in repeatedly_used},
+                "misses": {"count": len(self._misses), "strings": self._misses},
+                "unused": {
+                    "count": len(translation_stats.unused),
+                    "strings": translation_stats.unused,
                 },
             }
 
@@ -111,8 +103,6 @@ class Replacer:
 
         return (
             ReplacementStatus.WARNING
-            if len(translation_stats.get_repeatedly_used()) > 0
-            or len(translation_stats.get_unused()) > 0
-            or len(self._misses) > 0
+            if len(self._misses) > 0 or len(translation_stats.unused) > 0
             else ReplacementStatus.SUCCESS
         )

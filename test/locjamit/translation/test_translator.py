@@ -92,7 +92,7 @@ def test_translate_not_found(tmpdir: str):
 
     assert translator.translate("Anything").status is TranslationStatus.NOT_FOUND
 
-    mock_stats.return_value.count_use.assert_not_called()
+    mock_stats.return_value.register_use.assert_not_called()
 
 
 def test_translate(tmpdir: str):
@@ -111,7 +111,7 @@ def test_translate(tmpdir: str):
     assert result.status is TranslationStatus.SUCCESS
     assert result.value == "world"
 
-    mock_stats.return_value.count_use.assert_called_once_with("world")
+    mock_stats.return_value.register_use.assert_called_once_with("world")
 
 
 def test_get_stats(tmpdir: str):

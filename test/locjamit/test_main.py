@@ -119,13 +119,6 @@ def test_csv(tmpdir: str):
         stats = json.load(infile)
 
     assert stats == {
-        "misses": {"count": 2, "strings": ["Vuoi:", "avventura"]},
+        "misses": {"count": 3, "strings": ["Vuoi:", "avventura", "avventura"]},
         "unused": {"count": 1, "strings": ["not-used"]},
-        "used_repeatedly": {
-            "count": 3,
-            "strings": {
-                "3": ["used-repeatedly2", "used-repeatedly3"],
-                "2": ["used-repeatedly"],
-            },
-        },
     }

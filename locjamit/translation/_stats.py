@@ -1,46 +1,21 @@
 """Helpers for getting statistics about translations."""
 
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List
 
 
 class TranslationStatistics:
     """Accumulator for translations statistics."""
 
     def __init__(self, translations: Dict[str, str]):
-        self._use_count = {k: 0 for k in translations.values()}
-        self._counts = {0: set(translations.values())}
+        # Using list to preserve the order. Dictionary key order is deterministic!
+        self._unused = [translations[k] for k in translations.keys()]
 
-    def count_use(self, dest: str) -> None:
+    def register_use(self, dest: str) -> None:
         """Registers a use of the source string."""
-        prev = self._use_count[dest]
-        curr = prev + 1
+        if dest in self._unused:
+            self._unused = list(filter(lambda x: x != dest, self._unused))
 
-        self._use_count[dest] = curr
-
-        self._counts[prev].remove(dest)
-        if len(self._counts[prev]) == 0:
-            del self._counts[prev]
-
-        if curr not in self._counts:
-            self._counts[curr] = set()
-
-        self._counts[curr].add(dest)
-
-    def get_unused(self) -> Set[str]:
-        """Gets a set of the unused strings."""
-        return self._counts[0]
-
-    def get_use_counts(self) -> Dict[str, int]:
-        """Returns the number of times each string has been used."""
-        return self._use_count
-
-    def get_repeatedly_used(self) -> List[Tuple[int, Set[str]]]:
-        """Returns a list of translations used multiple times sorted in descending order."""
-        multi_use = []
-        for c in sorted(self._counts, reverse=True):
-            if c in {0, 1}:
-                break
-
-            multi_use.append((c, self._counts[c]))
-
-        return multi_use
+    @property
+    def unused(self) -> List[str]:
+        """Gets a list of the unused strings."""
+        return self._unused

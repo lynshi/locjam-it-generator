@@ -1,5 +1,6 @@
 import json
 import os
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -86,6 +87,11 @@ def test_replace(tmpdir: str, translator: Translator):
         return TranslationResult(src, TranslationStatus.SUCCESS, translations[src])
 
     translator.translate = translate
+
+    mock_stats = MagicMock()
+    mock_stats.unused = []
+    translator.get_stats.return_value = mock_stats  # type: ignore
+
     replacer = build_replacer(tmpdir, translator, input_js)
 
     assert replacer.replace() is ReplacementStatus.SUCCESS
@@ -110,7 +116,7 @@ def test_replace(tmpdir: str, translator: Translator):
         == translated.strip()
     )
 
-    assert replacer._misses == set()
+    assert replacer._misses == []
     assert replacer._translated is True
 
     with open(replacer._statistics_file, encoding="utf-8") as infile:
@@ -119,10 +125,6 @@ def test_replace(tmpdir: str, translator: Translator):
     assert stats == {
         "misses": {"count": 0, "strings": []},
         "unused": {"count": 0, "strings": []},
-        "used_repeatedly": {
-            "count": 0,
-            "strings": {},
-        },
     }
 
     with pytest.raises(AssertionError):
@@ -142,14 +144,6 @@ def test_replace_with_warnings(tmpdir: str):
             other: `avventura`,
             dup: `avventura`,
 			new: `Iniziare una nuova avventura`
-            repeated0: `repeated`,
-            repeated1: `repeated`,
-            repeated2: `repeated2`,
-            repeated3: `repeated2`,
-            repeated4: `repeated2`,
-            repeated5: `repeated3`,
-            repeated6: `repeated3`,
-            repeated7: `repeated3`,
 		}
     }
 }
@@ -160,9 +154,6 @@ def test_replace_with_warnings(tmpdir: str):
         'Salvataggio "${filename}" non trovato.': 'File "${filename}" not found',
         "Iniziare una nuova avventura": "this is new",
         "unused": "not-used",
-        "repeated": "used-repeatedly",
-        "repeated2": "used-repeatedly2",
-        "repeated3": "used-repeatedly3",
         "utf": "喔",
     }
     translations_csv = ["source,destination"]
@@ -193,14 +184,6 @@ def test_replace_with_warnings(tmpdir: str):
             other: `avventura`,
             dup: `avventura`,
 			new: `this is new`
-            repeated0: `used-repeatedly`,
-            repeated1: `used-repeatedly`,
-            repeated2: `used-repeatedly2`,
-            repeated3: `used-repeatedly2`,
-            repeated4: `used-repeatedly2`,
-            repeated5: `used-repeatedly3`,
-            repeated6: `used-repeatedly3`,
-            repeated7: `used-repeatedly3`,
 		}
     }
 }
@@ -208,23 +191,17 @@ def test_replace_with_warnings(tmpdir: str):
         == translated.strip()
     )
 
-    assert replacer._misses == {
+    assert replacer._misses == [
         "Vuoi:",
         "avventura",
-    }
+        "avventura",
+    ]
     assert replacer._translated is True
 
     with open(replacer._statistics_file, encoding="utf-8") as infile:
         stats = json.load(infile)
 
     assert stats == {
-        "misses": {"count": 2, "strings": ["Vuoi:", "avventura"]},
+        "misses": {"count": 3, "strings": ["Vuoi:", "avventura", "avventura"]},
         "unused": {"count": 2, "strings": ["not-used", "喔"]},
-        "used_repeatedly": {
-            "count": 3,
-            "strings": {
-                "3": ["used-repeatedly2", "used-repeatedly3"],
-                "2": ["used-repeatedly"],
-            },
-        },
     }

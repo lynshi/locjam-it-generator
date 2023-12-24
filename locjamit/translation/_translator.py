@@ -78,7 +78,7 @@ class Translator:
             return TranslationResult(src, TranslationStatus.NOT_FOUND)
 
         translation = self._translations[src]
-        self._stats.count_use(translation)
+        self._stats.register_use(translation)
         return TranslationResult(
             src,
             TranslationStatus.SUCCESS,
