@@ -20,7 +20,7 @@ Create a file `config.json` with the following information. Currently, we only s
   "csv": {
     "src_header": "HEADER_OF_ITALIAN_COLUMN",
     "dest_header": "HEADER_OF_NON_ITALIAN_COLUMN",
-    "delimiter": "CSV_DELIMITER_IF_NOT_COMMA",
+    "delimiter": "CSV_DELIMITER_IF_NOT_COMMA"
   }
 }
 ```
