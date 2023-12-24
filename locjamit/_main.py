@@ -1,4 +1,4 @@
-"""Main method for the replacer."""
+"""Main method for the locjamit."""
 
 import argparse
 import os
@@ -11,7 +11,7 @@ from locjamit.translation import CsvConfig, CsvTranslator
 
 
 def main():
-    """Main method for the translation utility."""
+    """Main method for the locjamit utility."""
 
     parser = argparse.ArgumentParser(
         "locjamit",
