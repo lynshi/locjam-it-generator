@@ -155,6 +155,7 @@ def test_replace_with_warnings(tmpdir: str):
         "Iniziare una nuova avventura": "this is new",
         "unused": "not-used",
         "repeated": "used-repeatedly",
+        "utf": "喔",
     }
     translations_csv = ["source,destination"]
     for k, v in translations.items():
@@ -204,7 +205,7 @@ def test_replace_with_warnings(tmpdir: str):
 
     assert stats == {
         "misses": {"count": 2, "strings": ["Vuoi:", "avventura"]},
-        "unused": {"count": 1, "strings": ["not-used"]},
+        "unused": {"count": 2, "strings": ["not-used", "喔"]},
         "used_repeatedly": {
             "count": 1,
             "strings": {"2": ["used-repeatedly"]},

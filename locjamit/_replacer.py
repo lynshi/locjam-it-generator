@@ -100,7 +100,7 @@ class Replacer:
             }
 
             with open(self._statistics_file, "w", encoding="utf-8") as outfile:
-                json.dump(stats, outfile, indent=4, sort_keys=True)
+                json.dump(stats, outfile, indent=4, sort_keys=True, ensure_ascii=False)
         finally:
             self._translated = True
 
