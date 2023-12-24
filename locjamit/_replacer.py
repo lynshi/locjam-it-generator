@@ -97,6 +97,10 @@ class Replacer:
                     "count": len(translation_stats.unused),
                     "strings": translation_stats.unused,
                 },
+                "duplicated_translations": {
+                    "count": len(translation_stats.duplicates),
+                    "strings": translation_stats.duplicates,
+                },
             }
 
             with open(self._statistics_file, "w", encoding="utf-8") as outfile:

@@ -2,7 +2,7 @@
 
 from enum import Enum
 import os
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, List, Optional
 
 from locjamit.translation._stats import TranslationStatistics
 
@@ -59,12 +59,15 @@ class TranslationResult:  # pylint: disable=missing-class-docstring
 class Translator:
     """Base class for replacing text."""
 
-    def __init__(self, input_file: str, builder: Callable[[str], Dict[str, str]]):
+    def __init__(
+        self, input_file: str, builder: Callable[[str, List[str]], Dict[str, str]]
+    ):
         if not os.path.isfile(input_file):
             raise FileNotFoundError(f"{input_file} not found")
 
-        self._translations = builder(input_file)
-        self._stats = TranslationStatistics(self._translations)
+        self._duplicates = []
+        self._translations = builder(input_file, self._duplicates)
+        self._stats = TranslationStatistics(self._translations, self._duplicates)
 
     def translate(self, src: str) -> TranslationResult:
         """Returns the translation given a source string.

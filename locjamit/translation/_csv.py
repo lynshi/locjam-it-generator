@@ -2,7 +2,7 @@
 """
 
 import csv
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 
 from locjamit.translation._translator import Translator
@@ -30,18 +30,16 @@ class CsvTranslator(Translator):  # pylint: disable=too-few-public-methods
 
     def __init__(self, input_csv: str, **kwargs: Any):
         builder = self._build_builder(**kwargs)
-
-        # Use a list to preserve order.
-        self._duplicates = []
-
         super().__init__(input_csv, builder)
 
-    def _build_builder(self, **kwargs: Any) -> Callable[[str], Dict[str, str]]:
+    def _build_builder(
+        self, **kwargs: Any
+    ) -> Callable[[str, List[str]], Dict[str, str]]:
         encoding = kwargs.pop("encoding", "utf-8")
         src_header = kwargs.pop("src_header", "source")
         dest_header = kwargs.pop("dest_header", "destination")
 
-        def _builder(input_csv: str):
+        def _builder(input_csv: str, duplicates: List[str]):
             translations = {}
             with open(input_csv, newline="", encoding=encoding) as infile:
                 reader = csv.DictReader(infile, **kwargs)
@@ -49,11 +47,11 @@ class CsvTranslator(Translator):  # pylint: disable=too-few-public-methods
                     src = row[src_header]
                     dest = row[dest_header]
 
-                    if src in self._duplicates:
+                    if src in duplicates:
                         continue
 
                     if src in translations and dest != translations[src]:
-                        self._duplicates.append(src)
+                        duplicates.append(src)
                         del translations[src]
                         continue
 

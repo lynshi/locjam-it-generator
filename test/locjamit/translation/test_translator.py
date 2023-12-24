@@ -59,7 +59,7 @@ def test_init_raises_if_file_not_found(tmpdir: str):
     input_file = os.path.join(tmpdir, "notexists.txt")
 
     with pytest.raises(FileNotFoundError):
-        Translator(input_file, lambda _: {})
+        Translator(input_file, lambda i, j: {})
 
 
 def test_init(tmpdir: str):
@@ -71,12 +71,12 @@ def test_init(tmpdir: str):
         "locjamit.translation._translator.TranslationStatistics",
         spec_set=TranslationStatistics,
     ) as mock_stats:
-        translator = Translator(input_file, lambda _: {"hello": "world"})
+        translator = Translator(input_file, lambda i, j: {"hello": "world"})
 
     assert translator._translations == {"hello": "world"}
     assert translator._stats == mock_stats.return_value
 
-    mock_stats.assert_called_once_with(translator._translations)
+    mock_stats.assert_called_once_with(translator._translations, translator._duplicates)
 
 
 def test_translate_not_found(tmpdir: str):
@@ -88,7 +88,7 @@ def test_translate_not_found(tmpdir: str):
         "locjamit.translation._translator.TranslationStatistics",
         spec_set=TranslationStatistics,
     ) as mock_stats:
-        translator = Translator(input_file, lambda _: {})
+        translator = Translator(input_file, lambda i, j: {})
 
     assert translator.translate("Anything").status is TranslationStatus.NOT_FOUND
 
@@ -104,7 +104,7 @@ def test_translate(tmpdir: str):
         "locjamit.translation._translator.TranslationStatistics",
         spec_set=TranslationStatistics,
     ) as mock_stats:
-        translator = Translator(input_file, lambda _: {"hello": "world"})
+        translator = Translator(input_file, lambda i, j: {"hello": "world"})
 
     result = translator.translate("hello")
 
@@ -123,6 +123,6 @@ def test_get_stats(tmpdir: str):
         "locjamit.translation._translator.TranslationStatistics",
         spec_set=TranslationStatistics,
     ) as mock_stats:
-        translator = Translator(input_file, lambda _: {"hello": "world"})
+        translator = Translator(input_file, lambda i, j: {"hello": "world"})
 
     assert translator.get_stats() == mock_stats.return_value

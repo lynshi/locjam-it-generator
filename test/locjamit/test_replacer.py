@@ -89,6 +89,7 @@ def test_replace(tmpdir: str, translator: Translator):
     translator.translate = translate
 
     mock_stats = MagicMock()
+    mock_stats.duplicates = []
     mock_stats.unused = []
     translator.get_stats.return_value = mock_stats  # type: ignore
 
@@ -125,6 +126,10 @@ def test_replace(tmpdir: str, translator: Translator):
     assert stats == {
         "misses": {"count": 0, "strings": []},
         "unused": {"count": 0, "strings": []},
+        "duplicated_translations": {
+            "count": 0,
+            "strings": [],
+        },
     }
 
     with pytest.raises(AssertionError):
@@ -159,6 +164,7 @@ def test_replace_with_warnings(tmpdir: str):
     translations_csv = ["source,destination"]
     for k, v in translations.items():
         translations_csv.append(f"{k},{v}")
+    translations_csv.append("utf,哇")
 
     transations_file = os.path.join(tmpdir, "translations.csv")
     with open(transations_file, "w", encoding="utf-8") as outfile:
@@ -203,5 +209,9 @@ def test_replace_with_warnings(tmpdir: str):
 
     assert stats == {
         "misses": {"count": 3, "strings": ["Vuoi:", "avventura", "avventura"]},
-        "unused": {"count": 2, "strings": ["not-used", "喔"]},
+        "unused": {"count": 1, "strings": ["not-used"]},
+        "duplicated_translations": {
+            "count": 1,
+            "strings": ["utf"],
+        },
     }

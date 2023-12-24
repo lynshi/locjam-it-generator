@@ -111,3 +111,4 @@ def test_init_ignores_exact_duplicates(tmpdir: str):
 
     translator = CsvTranslator(input_csv)
     assert translator._translations == translations
+    assert not translator._duplicates

@@ -49,14 +49,6 @@ def test_csv(tmpdir: str):
             other: `avventura`,
             dup: `avventura`,
 			new: `Iniziare una nuova avventura`
-            repeated0: `repeated`,
-            repeated1: `repeated`,
-            repeated2: `repeated2`,
-            repeated3: `repeated2`,
-            repeated4: `repeated2`,
-            repeated5: `repeated3`,
-            repeated6: `repeated3`,
-            repeated7: `repeated3`,
 		}
     }
 }
@@ -70,13 +62,12 @@ def test_csv(tmpdir: str):
         'Salvataggio "${filename}" non trovato.': 'File "${filename}" not found',
         "Iniziare una nuova avventura": "this is new",
         "unused": "not-used",
-        "repeated": "used-repeatedly",
-        "repeated2": "used-repeatedly2",
-        "repeated3": "used-repeatedly3",
+        "utf": "喔",
     }
     translations_csv = ["source,destination"]
     for k, v in translations.items():
         translations_csv.append(f"{k},{v}")
+    translations_csv.append("utf,哇")
 
     with open(config["translations"], "w", encoding="utf-8") as outfile:
         outfile.write("\n".join(translations_csv))
@@ -100,14 +91,6 @@ def test_csv(tmpdir: str):
             other: `avventura`,
             dup: `avventura`,
 			new: `this is new`
-            repeated0: `used-repeatedly`,
-            repeated1: `used-repeatedly`,
-            repeated2: `used-repeatedly2`,
-            repeated3: `used-repeatedly2`,
-            repeated4: `used-repeatedly2`,
-            repeated5: `used-repeatedly3`,
-            repeated6: `used-repeatedly3`,
-            repeated7: `used-repeatedly3`,
 		}
     }
 }
@@ -121,4 +104,8 @@ def test_csv(tmpdir: str):
     assert stats == {
         "misses": {"count": 3, "strings": ["Vuoi:", "avventura", "avventura"]},
         "unused": {"count": 1, "strings": ["not-used"]},
+        "duplicated_translations": {
+            "count": 1,
+            "strings": ["utf"],
+        },
     }
