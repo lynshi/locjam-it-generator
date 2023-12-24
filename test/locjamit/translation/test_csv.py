@@ -75,6 +75,7 @@ def test_init_detects_duplicates(tmpdir: str):
     translations = {
         "hello": "你好",
         "world": "世界",
+        "dup": "any",
     }
 
     input_csv = os.path.join(tmpdir, "input.csv")
@@ -85,9 +86,12 @@ def test_init_detects_duplicates(tmpdir: str):
             outfile.write(f"\n{k},{v}")
 
         outfile.write("\nhello,again")
+        outfile.write("\ndup,second")
+        outfile.write("\ndup,third")
 
-    with pytest.raises(RuntimeError):
-        CsvTranslator(input_csv)
+    translator = CsvTranslator(input_csv)
+    assert translator._translations == {"world": "世界"}
+    assert translator._duplicates == ["hello", "dup"]
 
 
 def test_init_ignores_exact_duplicates(tmpdir: str):

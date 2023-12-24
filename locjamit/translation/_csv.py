@@ -29,28 +29,36 @@ class CsvTranslator(Translator):  # pylint: disable=too-few-public-methods
     """Creates a Translator from a CSV file."""
 
     def __init__(self, input_csv: str, **kwargs: Any):
-        builder = _build_builder(**kwargs)
+        builder = self._build_builder(**kwargs)
+
+        # Use a list to preserve order.
+        self._duplicates = []
+
         super().__init__(input_csv, builder)
 
+    def _build_builder(self, **kwargs: Any) -> Callable[[str], Dict[str, str]]:
+        encoding = kwargs.pop("encoding", "utf-8")
+        src_header = kwargs.pop("src_header", "source")
+        dest_header = kwargs.pop("dest_header", "destination")
 
-def _build_builder(**kwargs: Any) -> Callable[[str], Dict[str, str]]:
-    encoding = kwargs.pop("encoding", "utf-8")
-    src_header = kwargs.pop("src_header", "source")
-    dest_header = kwargs.pop("dest_header", "destination")
+        def _builder(input_csv: str):
+            translations = {}
+            with open(input_csv, newline="", encoding=encoding) as infile:
+                reader = csv.DictReader(infile, **kwargs)
+                for row in reader:
+                    src = row[src_header]
+                    dest = row[dest_header]
 
-    def _builder(input_csv: str):
-        translations = {}
-        with open(input_csv, newline="", encoding=encoding) as infile:
-            reader = csv.DictReader(infile, **kwargs)
-            for row in reader:
-                src = row[src_header]
-                dest = row[dest_header]
+                    if src in self._duplicates:
+                        continue
 
-                if src in translations and dest != translations[src]:
-                    raise RuntimeError(f"'{src}' has been translated twice")
+                    if src in translations and dest != translations[src]:
+                        self._duplicates.append(src)
+                        del translations[src]
+                        continue
 
-                translations[src] = dest
+                    translations[src] = dest
 
-        return translations
+            return translations
 
-    return _builder
+        return _builder

@@ -43,7 +43,10 @@ class Replacer:
         self._translator = translator
         self._output_file = output_file
         self._statistics_file = statistics_file
+
+        # Use a list to preserve order. Duplicates are ok.
         self._misses = []
+
         self._translated = False
 
     @property

@@ -116,7 +116,7 @@ def test_replace(tmpdir: str, translator: Translator):
         == translated.strip()
     )
 
-    assert replacer._misses == []
+    assert not replacer._misses
     assert replacer._translated is True
 
     with open(replacer._statistics_file, encoding="utf-8") as infile:
