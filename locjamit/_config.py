@@ -2,6 +2,7 @@
 
 import json
 import os
+from typing import Any, Dict
 
 from loguru import logger
 
@@ -16,36 +17,33 @@ class Config:
         with open(config_file, encoding="utf-8") as infile:
             self._config = json.load(infile)
 
-        logger.debug(
-            f"""Parameters:\n
-            \tInput file: {self.input_file}\n
-            \tOutput file: {self.output_file}\n
-            \tTranslations file: {self.translations_file}\n"""
-        )
+    @property
+    def csv_config(
+        self,
+    ) -> Dict[str, Any]:  # pylint: disable=missing-function-docstring
+        return self._config.get("csv", {})
 
     @property
     def input_file(self) -> str:  # pylint: disable=missing-function-docstring
         field_name = "input"
-        try:
-            return self._config[field_name]
-        except KeyError as exc:
-            raise ValueError(
-                f"`{field_name}` field not present in configuration"
-            ) from exc
+        return self._get_field(field_name)
+
+    @property
+    def missed_file(self) -> str:  # pylint: disable=missing-function-docstring
+        field_name = "missed"
+        return self._get_field(field_name)
 
     @property
     def output_file(self) -> str:  # pylint: disable=missing-function-docstring
         field_name = "output"
-        try:
-            return self._config[field_name]
-        except KeyError as exc:
-            raise ValueError(
-                f"`{field_name}` field not present in configuration"
-            ) from exc
+        return self._get_field(field_name)
 
     @property
     def translations_file(self) -> str:  # pylint: disable=missing-function-docstring
         field_name = "translations"
+        return self._get_field(field_name)
+
+    def _get_field(self, field_name: str) -> Any:
         try:
             return self._config[field_name]
         except KeyError as exc:

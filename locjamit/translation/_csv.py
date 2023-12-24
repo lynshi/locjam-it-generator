@@ -8,6 +8,23 @@ from typing import Any, Callable, Dict
 from locjamit.translation._translator import Translator
 
 
+class CsvConfig:
+    """Parses configuration for a CsvTranslator."""
+
+    def __init__(self, config: Dict[str, Any]):
+        self._config = config
+
+    def as_kwargs(self) -> Dict[str, Any]:  # pylint: disable=missing-function-docstring
+        config = {}
+
+        fields = ["encoding", "src_header", "dest_header"]
+        for field in fields:
+            if field in self._config:
+                config[field] = self._config[field]
+
+        return config
+
+
 class CsvTranslator(Translator):  # pylint: disable=too-few-public-methods
     """Creates a Translator from a CSV file."""
 

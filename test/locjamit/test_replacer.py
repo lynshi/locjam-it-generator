@@ -13,19 +13,6 @@ def test_init_input_not_found(tmpdir: str, translator: Translator):
         Replacer(input_file=input_file, output_file="", translator=translator)
 
 
-def test_init_raises_if_output_exists(tmpdir: str, translator: Translator):
-    input_file = os.path.join(tmpdir, "input.txt")
-    with open(input_file, "w", encoding="utf-8"):
-        pass
-
-    output_file = os.path.join(tmpdir, "output.txt")
-    with open(output_file, "w", encoding="utf-8"):
-        pass
-
-    with pytest.raises(FileExistsError):
-        Replacer(input_file=input_file, output_file=output_file, translator=translator)
-
-
 def test_init(tmpdir: str, translator: Translator):
     input_js = "import svelte;"
     input_file = os.path.join(tmpdir, "input.txt")
@@ -42,29 +29,7 @@ def test_init(tmpdir: str, translator: Translator):
     assert replacer._translator == translator
     assert replacer.output_file == output_file
     assert replacer.misses == []
-
-
-def test_init_exists_ok(tmpdir: str, translator: Translator):
-    input_js = "import svelte;"
-    input_file = os.path.join(tmpdir, "input.txt")
-    with open(input_file, "w", encoding="utf-8") as outfile:
-        outfile.write(input_js)
-
-    output_file = os.path.join(tmpdir, "output.txt")
-    with open(output_file, "w", encoding="utf-8"):
-        pass
-
-    replacer = Replacer(
-        input_file=input_file,
-        output_file=output_file,
-        translator=translator,
-        overwrite_output=True,
-    )
-
-    assert replacer._original_js == input_js
-    assert replacer._translator == translator
-    assert replacer.output_file == output_file
-    assert replacer.misses == []
+    assert replacer._translated is False
 
 
 def build_replacer(tmpdir: str, translator: Translator, input_js: str):
@@ -78,7 +43,6 @@ def build_replacer(tmpdir: str, translator: Translator, input_js: str):
         input_file=input_file,
         output_file=output_file,
         translator=translator,
-        overwrite_output=True,
     )
 
 
@@ -144,3 +108,7 @@ def test_replace(tmpdir: str, translator: Translator):
         "Vuoi:",
         "avventura",
     ]
+    assert replacer._translated is True
+
+    with pytest.raises(AssertionError):
+        replacer.replace()

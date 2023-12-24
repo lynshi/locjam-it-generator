@@ -1,8 +1,28 @@
 import os
+from typing import Optional
 
 import pytest
 
-from locjamit.translation import CsvTranslator
+from locjamit.translation import CsvConfig, CsvTranslator
+
+
+@pytest.mark.parametrize(
+    "missing",
+    [
+        None,
+        "encoding",
+        "src_header",
+        "dest_header",
+    ],
+)
+def test_CsvConfig(missing: Optional[str]):
+    config_json = {"encoding": "ascii", "src_header": "dest", "dest_header": "src"}
+
+    if missing:
+        del config_json[missing]
+
+    config = CsvConfig(config_json)
+    assert config.as_kwargs() == config_json
 
 
 def test_init(tmpdir: str):
