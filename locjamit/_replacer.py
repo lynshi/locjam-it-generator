@@ -1,8 +1,10 @@
 # pylint: disable=missing-module-docstring
 from __future__ import annotations
 
+from enum import Enum
+import json
 import os
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING
 
 from loguru import logger
 
@@ -10,6 +12,11 @@ from locjamit.translation import TranslationStatus
 
 if TYPE_CHECKING:  # pragma: no cover
     from locjamit.translation import Translator
+
+
+class ReplacementStatus(Enum):
+    SUCCESS = 0
+    WARNING = 1
 
 
 class Replacer:
@@ -22,6 +29,7 @@ class Replacer:
         *,
         input_file: str,
         output_file: str,
+        statistics_file: str,
         translator: Translator,
     ):
         if not os.path.isfile(input_file):
@@ -32,6 +40,7 @@ class Replacer:
 
         self._translator = translator
         self._output_file = output_file
+        self._statistics_file = statistics_file
         self._misses = set()
         self._translated = False
 
@@ -40,10 +49,13 @@ class Replacer:
         """Returns the name of the file containing translated output."""
         return self._output_file
 
-    def replace(self):
-        """Translate the input JavaScript file and emits the specified output file.
+    def replace(self) -> ReplacementStatus:
+        """Translates the input JavaScript file and emits the specified output file.
 
         Must only be called once.
+
+        :return: Returns the status of the replacement.
+        :rtype: bool
         """
 
         assert self._translated is False, "`replace` can only be called once"
@@ -73,10 +85,27 @@ class Replacer:
             with open(self._output_file, "w", encoding="utf-8") as outfile:
                 outfile.writelines(translated)
 
+            translation_stats = self._translator.get_stats()
+            unused = translation_stats.get_unused()
+            repeatedly_used = translation_stats.get_repeatedly_used()
+            stats = {
+                "misses": {"count": len(self._misses), "strings": sorted(self._misses)},
+                "unused": {"count": len(unused), "strings": sorted(unused)},
+                "used_repeated": {
+                    "count": len(repeatedly_used),
+                    "strings": {item[0]: item[1] for item in repeatedly_used},
+                },
+            }
+
+            with open(self._statistics_file, "w", encoding="utf-8") as outfile:
+                json.dump(stats, outfile, indent=4, sort_keys=True)
         finally:
             self._translated = True
 
-    @property
-    def misses(self) -> List[str]:
-        """Returns strings that were missed in the translation."""
-        return sorted(self._misses)
+        return (
+            ReplacementStatus.WARNING
+            if len(translation_stats.get_repeatedly_used()) > 0
+            or len(translation_stats.get_unused()) > 0
+            or len(self._misses) > 0
+            else ReplacementStatus.SUCCESS
+        )

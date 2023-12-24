@@ -6,7 +6,7 @@ import os
 from loguru import logger
 
 from locjamit._config import Config
-from locjamit._replacer import Replacer
+from locjamit._replacer import ReplacementStatus, Replacer
 from locjamit.translation import CsvConfig, CsvTranslator
 
 
@@ -45,13 +45,18 @@ def main():
     replacer = Replacer(
         input_file=config.input_file,
         output_file=config.output_file,
+        statistics_file=config.stats_file,
         translator=translator,
     )
 
     try:
-        replacer.replace()
+        replacement_status = replacer.replace()
     except Exception:
         logger.opt(exception=True).error("Error generating translated file")
         raise
+
+    if replacement_status is not ReplacementStatus.SUCCESS:
+        logger.warning(f"There are warnings. Please check {config.stats_file}.")
+        return
 
     logger.success(f"Translation success! Please open {config.output_file}")

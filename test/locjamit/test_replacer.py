@@ -9,8 +9,14 @@ from locjamit.translation._translator import TranslationResult
 
 def test_init_input_not_found(tmpdir: str, translator: Translator):
     input_file = os.path.join(tmpdir, "not-found.txt")
+    statistics_file = os.path.join(tmpdir, "stats.txt")
     with pytest.raises(FileNotFoundError):
-        Replacer(input_file=input_file, output_file="", translator=translator)
+        Replacer(
+            input_file=input_file,
+            output_file="",
+            statistics_file=statistics_file,
+            translator=translator,
+        )
 
 
 def test_init(tmpdir: str, translator: Translator):
@@ -19,16 +25,19 @@ def test_init(tmpdir: str, translator: Translator):
     with open(input_file, "w", encoding="utf-8") as outfile:
         outfile.write(input_js)
 
+    statistics_file = os.path.join(tmpdir, "stats.txt")
     output_file = os.path.join(tmpdir, "output.txt")
 
     replacer = Replacer(
-        input_file=input_file, output_file=output_file, translator=translator
+        input_file=input_file,
+        output_file=output_file,
+        statistics_file=statistics_file,
+        translator=translator,
     )
 
     assert replacer._original_js == input_js
     assert replacer._translator == translator
     assert replacer.output_file == output_file
-    assert replacer.misses == []
     assert replacer._translated is False
 
 
@@ -37,11 +46,13 @@ def build_replacer(tmpdir: str, translator: Translator, input_js: str):
     with open(input_file, "w", encoding="utf-8") as outfile:
         outfile.write(input_js)
 
+    statistics_file = os.path.join(tmpdir, "stats.txt")
     output_file = os.path.join(tmpdir, "output.txt")
 
     return Replacer(
         input_file=input_file,
         output_file=output_file,
+        statistics_file=statistics_file,
         translator=translator,
     )
 
@@ -104,10 +115,10 @@ def test_replace(tmpdir: str, translator: Translator):
         == translated.strip()
     )
 
-    assert replacer.misses == [
+    assert replacer._misses == {
         "Vuoi:",
         "avventura",
-    ]
+    }
     assert replacer._translated is True
 
     with pytest.raises(AssertionError):
