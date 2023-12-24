@@ -144,6 +144,12 @@ def test_replace_with_warnings(tmpdir: str):
 			new: `Iniziare una nuova avventura`
             repeated0: `repeated`,
             repeated1: `repeated`,
+            repeated2: `repeated2`,
+            repeated3: `repeated2`,
+            repeated4: `repeated2`,
+            repeated5: `repeated3`,
+            repeated6: `repeated3`,
+            repeated7: `repeated3`,
 		}
     }
 }
@@ -155,6 +161,8 @@ def test_replace_with_warnings(tmpdir: str):
         "Iniziare una nuova avventura": "this is new",
         "unused": "not-used",
         "repeated": "used-repeatedly",
+        "repeated2": "used-repeatedly2",
+        "repeated3": "used-repeatedly3",
         "utf": "喔",
     }
     translations_csv = ["source,destination"]
@@ -187,6 +195,12 @@ def test_replace_with_warnings(tmpdir: str):
 			new: `this is new`
             repeated0: `used-repeatedly`,
             repeated1: `used-repeatedly`,
+            repeated2: `used-repeatedly2`,
+            repeated3: `used-repeatedly2`,
+            repeated4: `used-repeatedly2`,
+            repeated5: `used-repeatedly3`,
+            repeated6: `used-repeatedly3`,
+            repeated7: `used-repeatedly3`,
 		}
     }
 }
@@ -207,7 +221,10 @@ def test_replace_with_warnings(tmpdir: str):
         "misses": {"count": 2, "strings": ["Vuoi:", "avventura"]},
         "unused": {"count": 2, "strings": ["not-used", "喔"]},
         "used_repeatedly": {
-            "count": 1,
-            "strings": {"2": ["used-repeatedly"]},
+            "count": 3,
+            "strings": {
+                "3": ["used-repeatedly2", "used-repeatedly3"],
+                "2": ["used-repeatedly"],
+            },
         },
     }

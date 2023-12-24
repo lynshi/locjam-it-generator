@@ -90,11 +90,16 @@ class Replacer:
             translation_stats = self._translator.get_stats()
             unused = translation_stats.get_unused()
             repeatedly_used = translation_stats.get_repeatedly_used()
+
+            repeated_count = 0
+            for _, repeated_strings in repeatedly_used:
+                repeated_count += len(repeated_strings)
+
             stats = {
                 "misses": {"count": len(self._misses), "strings": sorted(self._misses)},
                 "unused": {"count": len(unused), "strings": sorted(unused)},
                 "used_repeatedly": {
-                    "count": len(repeatedly_used),
+                    "count": repeated_count,
                     "strings": {item[0]: sorted(item[1]) for item in repeatedly_used},
                 },
             }
